@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Story Creator</title>
+    <link rel="stylesheet" href="index.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@600;700&family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.15.0",
+    "jspdf": "https://esm.sh/jspdf@2.5.1",
+    "html2canvas": "https://esm.sh/html2canvas@1.4.1",
+    "three": "https://esm.sh/three@0.160.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="background-shapes"></div>
+    <main class="container">
+      <div class="form-container card">
+        <header>
+          <h1 class="logo">AI <span class="logo-gradient">Story Creator</span></h1>
+          <p class="form-subtitle">Bring your stories to life with the power of AI</p>
+        </header>
+
+        <form id="story-form">
+            <fieldset>
+                <legend>Characters</legend>
+                 <div id="character-inputs">
+                    <div class="input-group icon-input">
+                      <input type="text" id="character-1" name="character-1" placeholder="Character Name 1" required>
+                      <span class="input-icon user-icon"></span>
+                    </div>
+                </div>
+                <button type="button" id="add-character-btn">+ Add Character</button>
+            </fieldset>
+
+            <fieldset>
+                <legend>Story Details</legend>
+                <div class="input-group icon-input">
+                    <input type="text" id="theme" name="theme" placeholder="e.g., A quest for a lost artifact" required>
+                    <span class="input-icon theme-icon"></span>
+                </div>
+                <div class="input-group icon-input">
+                    <input type="text" id="setting" name="setting" placeholder="e.g., An enchanted forest" required>
+                    <span class="input-icon location-icon"></span>
+                </div>
+                <div class="input-group">
+                    <select id="genre" name="genre" required>
+                        <option value="" disabled selected>Select a Genre</option>
+                        <option value="Fantasy">Fantasy</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Mystery">Mystery</option>
+                        <option value="Adventure">Adventure</option>
+                        <option value="Horror">Horror</option>
+                        <option value="Romance">Romance</option>
+                        <option value="Comedy">Comedy</option>
+                        <option value="Thriller">Thriller</option>
+                    </select>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Customization</legend>
+                 <div class="input-group">
+                    <select id="language" name="language" required>
+                        <option value="English">English</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="German">German</option>
+                        <option value="Italian">Italian</option>
+                        <option value="Portuguese">Portuguese</option>
+                        <option value="Russian">Russian</option>
+                        <option value="Mandarin Chinese">Mandarin Chinese</option>
+                        <option value="Japanese">Japanese</option>
+                        <option value="Korean">Korean</option>
+                        <option value="Arabic">Arabic</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="Urdu">Urdu</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <select id="writing-style" name="writing-style" required>
+                        <option value="Standard" selected>Standard Style</option>
+                        <option value="Descriptive and Vivid">Descriptive and Vivid</option>
+                        <option value="Fast-Paced and Action-Oriented">Fast-Paced and Action-Oriented</option>
+                        <option value="Humorous and Witty">Humorous and Witty</option>
+                        <option value="Poetic and Lyrical">Poetic and Lyrical</option>
+                        <option value="Minimalist and Direct">Minimalist and Direct</option>
+                        <option value="Dramatic and Tense">Dramatic and Tense</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <select id="audience" name="audience" required>
+                        <option value="Children">For Children</option>
+                        <option value="Teenagers">For Teenagers</option>
+                        <option value="Adults">For Adults</option>
+                    </select>
+                </div>
+                <div class="input-group icon-input">
+                    <input type="number" id="word-limit" name="word-limit" placeholder="Word Count (optional)">
+                     <span class="input-icon word-count-icon"></span>
+                </div>
+            </fieldset>
+             <div class="input-group">
+                <textarea id="additional-details" name="additional-details" placeholder="Add any extra instructions or details here..."></textarea>
+            </div>
+
+          <button type="submit" id="generate-btn">
+            <span>Generate My Story</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="story-container card">
+          <div id="editor-toolbar" class="hidden">
+              <button type="button" class="tool-btn" data-command="undo" title="Undo"><svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"></path></svg></button>
+              <button type="button" class="tool-btn" data-command="redo" title="Redo"><svg viewBox="0 0 24 24"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.96 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"></path></svg></button>
+              <div class="separator"></div>
+              <select id="format-block-select" class="tool-select" title="Format">
+                  <option value="p">Paragraph</option>
+                  <option value="h1">Heading 1</option>
+                  <option value="h2">Heading 2</option>
+                  <option value="h3">Heading 3</option>
+                  <option value="blockquote">Quote</option>
+              </select>
+              <select id="font-family-select" class="tool-select" title="Font">
+                  <option value="Arial">Arial</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="Montserrat">Montserrat</option>
+                  <option value="Jameel Noori Nastaleeq">Jameel Noori Nastaleeq</option>
+                  <option value="Poppins">Poppins</option>
+                  <option value="Roboto">Roboto</option>
+                  <option value="Open Sans">Open Sans</option>
+                  <option value="Lato">Lato</option>
+                  <option value="Oswald">Oswald</option>
+                  <option value="Verdana">Verdana</option>
+                  <option value="Times New Roman">Times New Roman</option>
+              </select>
+               <select id="font-size-select" class="tool-select" title="Font Size">
+                  <option value="1">1 (8pt)</option>
+                  <option value="2">2 (10pt)</option>
+                  <option value="3" selected>3 (12pt)</option>
+                  <option value="4">4 (14pt)</option>
+                  <option value="5">5 (18pt)</option>
+                  <option value="6">6 (24pt)</option>
+                  <option value="7">7 (36pt)</option>
+              </select>
+              <div class="separator"></div>
+              <button type="button" class="tool-btn" data-command="bold" title="Bold"><svg viewBox="0 0 24 24"><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4.25-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"></path></svg></button>
+              <button type="button" class="tool-btn" data-command="italic" title="Italic"><svg viewBox="0 0 24 24"><path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z"></path></svg></button>
+              <button type="button" class="tool-btn" data-command="underline" title="Underline"><svg viewBox="0 0 24 24"><path d="M12 17c3.31 0 6-2.69 6-6V3h-2.5v8c0 1.93-1.57 3.5-3.5 3.5S8.5 12.93 8.5 11V3H6v8c0 3.31 2.69 6 6 6zm-7 2v2h14v-2H5z"></path></svg></button>
+              <button type="button" class="tool-btn" data-command="strikeThrough" title="Strikethrough"><svg viewBox="0 0 24 24"><path d="M10 19h4v-3h-4v3zM5 4v3h5v3h4V7h5V4H5zM3 14h18v-2H3v2z"></path></svg></button>
+              <div class="tool-color-picker" title="Text Color">
+                <input type="color" id="fore-color-input" class="tool-color-input" data-command="foreColor">
+                <label for="fore-color-input" style="border-bottom-color: #000000;">A</label>
+              </div>
+              <div class="tool-color-picker" title="Highlight Color">
+                <input type="color" id="back-color-input" class="tool-color-input" data-command="backColor" value="#ffffff">
+                <label for="back-color-input" style="background-color: #ffffff;"><svg viewBox="0 0 24 24"><path d="M16.53 9.75 12 21.5 7.47 9.75h9.06M12 0 7.37 8.25h9.25L12 0zM4.27 8.25 0 21.5h10.43L4.27 8.25zm15.46 0L13.57 21.5H24L19.73 8.25z"></path></svg></label>
+              </div>
+              <div class="separator"></div>
+              <button type="button" class="tool-btn" data-command="justifyLeft" title="Align Left"><svg viewBox="0 0 24 24"><path d="M15 15H3v2h12v-2zm0-8H3v2h12V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z"></path></svg></button>
+              <button type="button" class="tool-btn" data-command="justifyCenter" title="Align Center"><svg viewBox="0 0 24 24"><path d="M7 15v2h10v-2H7zm-4 6h18v-2H3v2zm0-8h18v-2H3v2zm4-6v2h10V7H7zM3 3v2h18V3H3z"></path></svg></button>
+              <button type="button" class="tool-btn" data-command="justifyRight" title="Align Right"><svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm6-4h12v-2H9v2zm-6-4h18v-2H3v2zm6-4h12V7H9v2zM3 3v2h18V3H3z"></path></svg></button>
+              <button type="button" class="tool-btn" data-command="justifyFull" title="Justify"><svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18V7H3v2zm0-6v2h18V3H3z"></path></svg></button>
+               <div class="separator"></div>
+               <button type="button" class="tool-btn" data-command="insertUnorderedList" title="Bulleted List"><svg viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"></path></svg></button>
+               <button type="button" class="tool-btn" data-command="insertOrderedList" title="Numbered List"><svg viewBox="0 0 24 24"><path d="M2 17h2v.5H3v1h1v.5H2v1h3v-4H2v1zm1-9h1V4H2v1h1v3zm-1 3h1.8L2 13.1v.9h3v-1H3.2L5 11.1V10H2v1zm5-6v2h14V5H7zm0 14h14v-2H7v2zm0-6h14v-2H7v2z"></path></svg></button>
+               <button type="button" class="tool-btn" data-command="indent" title="Increase Indent"><svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zM3 3v2h18V3H3zm8 4h10V7H11v2zm0 4h10v-2H11v2zm0 4h10v-2H11v2zM3 8v8l4-4-4-4z"></path></svg></button>
+               <button type="button" class="tool-btn" data-command="outdent" title="Decrease Indent"><svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18V7H3v2zm0-4v2h18V3H3zm8 8l4-4-4-4v8z"></path></svg></button>
+              <div class="separator"></div>
+              <select id="line-spacing-select" class="tool-select" title="Line Spacing">
+                  <option value="1.0">Single</option>
+                  <option value="1.15">1.15</option>
+                  <option value="1.5">1.5</option>
+                  <option value="2.0">Double</option>
+              </select>
+               <button type="button" class="tool-btn" data-command="removeFormat" title="Clear Formatting"><svg viewBox="0 0 24 24"><path d="M3.27 5 2 6.27l6.97 6.97L6.5 19h3l1.57-3.66L15.5 19.77l1.27-1.27L3.27 5zM10.5 5H19v2h-3.33l4 4H21v2h-4.72l-2-2H14v2h-1.45L10.5 5z"></path></svg></button>
+          </div>
+          <div id="story-output">
+             <div class="placeholder">
+                <p>Your generated story will appear here.</p>
+             </div>
+          </div>
+          <div id="story-actions" class="hidden">
+            <button type="button" id="rewrite-btn" class="action-btn hidden">
+                <svg viewBox="0 0 24 24"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"></path></svg>
+                <span>Rewrite Story</span>
+            </button>
+             <button type="button" id="copy-btn" class="action-btn">
+                <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path></svg>
+                <span>Copy to Clipboard</span>
+            </button>
+            <button type="button" id="download-pdf-btn" class="action-btn">
+                <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>
+                <span>Download PDF</span>
+            </button>
+             <button type="button" id="start-over-btn" class="action-btn">
+                <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"></path></svg>
+                <span>Start Over</span>
+            </button>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="index.tsx"></script>
+  </body>
+</html>
